@@ -111,8 +111,17 @@
 #         # driver.quit() # Uncomment to close the browser after execution in final version
 
 
-from src.utils.logger import setup_logger
+# from src.utils.logger import setup_logger
+#
+# logger = setup_logger(__name__)
+#
+# logger.info("Import and logger setup successful!")
 
-logger = setup_logger(__name__)
+from playwright.sync_api import sync_playwright
 
-logger.info("Import and logger setup successful!")
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)  # Change to False for visual browser
+    page = browser.new_page()
+    page.goto('https://example.com')
+    print(page.title())
+    browser.close()
