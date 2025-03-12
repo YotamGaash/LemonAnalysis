@@ -1,30 +1,64 @@
-
 {
-"facebook": {
-    "access_token": "EAAIBdZCAD0hABO4XEAOkWgrWSZBhDGO51XDcUf70EfZBoFWI5WDZAAdgzsU90hcN5pfoyupxnZBcC5uWiNFLhZBaDydr31QrNZBbZBZBfO75pizJwoQkGfLfnrAhGE5KeLZBL65nNmZCFD35Ca66on8fBZC9cv16QYLOetCFW4q8GfjiRSFveN2RmKpIbrPW6ZA4OaQcpftiw35sEuLiAZAlBNmYoGsVgMSnsLZAqPu63fDC18EpZC8bOWwzbDxissuBA2gZD",
-    "api_version": "v21.0",
-    "groups": [
-      "GROUP_ID_1",
-      "GROUP_ID_2"
-      // ... more group IDs
-    ],
-    "users": [
-      "USER_ID_1",
-      "USER_ID_2"
-      // ... more user IDs
-    ],
-    "fields": [
-      "created_time",
-      "likes.summary(true)",
-      "comments.summary(true)",
-      "reactions.summary(true)",
-      "from" // To get user info in posts
-    ],
-    "post_limit": 100 // Number of posts per API call (maximum allowed might depend on your app and permissions)
-
-
+  "logging": {
+    "log_dir": "logs",
+    "log_file_name": "app.log",
+    "max_file_size": 5242880,
+    "backup_count": 3,
+    "log_level_console": "DEBUG",
+    "log_level_file": "INFO"
   },
-  "output":{
-    "raw_data_path": "data/raw_data.json",
-    "processed_data_path":"data/processed_data.csv"
+  "application": {
+    "app_name": "Lemonade",
+    "version": "1.0.0",
+    "default_output_dir": "output"
+  },
+  "constants": {
+    "timeout": 30,
+    "retrieval_attempts": 3,
+    "api_url": "https://example.com/api"
+  },
+  "meta": {
+    "logging.log_dir": {
+      "type": "str",
+      "default": "logs"
+    },
+    "logging.log_file_name": {
+      "type": "str",
+      "default": "app.log"
+    },
+    "logging.max_file_size": {
+      "type": "int",
+      "default": 5242880,
+      "min": 1
+    },
+    "logging.backup_count": {
+      "type": "int",
+      "default": 3,
+      "min": 0
+    },
+    "logging.log_level_console": {
+      "type": "str",
+      "default": "DEBUG",
+      "choices": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    },
+    "logging.log_level_file": {
+      "type": "str",
+      "default": "INFO",
+      "choices": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    },
+    "constants.timeout": {
+      "type": "int",
+      "default": 30,
+      "min": 1
+    },
+    "constants.retrieval_attempts": {
+      "type": "int",
+      "default": 3,
+      "min": 1
+    },
+    "constants.api_url": {
+      "type": "str",
+      "default": ""
+    }
   }
+}

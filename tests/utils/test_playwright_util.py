@@ -1,4 +1,4 @@
-from src.utils.playwright_utils import launch_browser, close_browser
+from src.utils.playwright_util import launch_browser, close_browser
 
 
 def test_browser_launch():

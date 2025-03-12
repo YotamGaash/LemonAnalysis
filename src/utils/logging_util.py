@@ -1,49 +1,55 @@
 import logging
-import sys
 import os
+import sys
 from logging.handlers import RotatingFileHandler
+from src.utils.config_util import ConfigUtil
 
 
-def setup_logger(logger_name: str, console_level=logging.DEBUG, file_level=logging.INFO, log_file="app.log"):
+def setup_logger(logger_name: str) -> logging.Logger:
     """
     Sets up and returns a logger instance with console and rotating file handlers.
+    All settings are fetched from the ConfigUtil.
 
     Args:
-        logger_name (str): The name of the logger (usually __name__).
-        console_level (int): Logging level for the console handler.
-        file_level (int): Logging level for the file handler.
-        log_file (str): Name of the log file (default is 'app.log').
+        logger_name (str): The name of the logger.
 
     Returns:
         logging.Logger: A configured logger instance.
     """
-    # Set the default log directory to "logs/" in the project root
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))  # Navigate to project root
-    log_dir = os.path.join(project_root, "logs")  # Set logs/ directory
-    os.makedirs(log_dir, exist_ok=True)  # Create "logs/" directory if it doesn't exist
+    # Fetch logging configuration from ConfigUtil
+    log_dir = ConfigUtil.get("logging.log_dir")
+    log_file_name = ConfigUtil.get("logging.log_file_name")
+    max_file_size = ConfigUtil.get("logging.max_file_size")
+    backup_count = ConfigUtil.get("logging.backup_count")
+    console_level = getattr(logging, ConfigUtil.get("logging.log_level_console"))
+    file_level = getattr(logging, ConfigUtil.get("logging.log_level_file"))
+    log_format = ConfigUtil.get("logging.log_format")
 
-    # Full path for the log file
-    log_file_path = os.path.join(log_dir, log_file)
+    # Ensure the log directory exists
+    os.makedirs(log_dir, exist_ok=True)
 
+    # Log file path
+    log_file_path = os.path.join(log_dir, log_file_name)
+
+    # Initialize the logger
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)  # Root logger level; handlers filter actual output
+    logger.setLevel(logging.DEBUG)  # Set root logger level to DEBUG
 
-    # Reset handlers to avoid false `hasHandlers()` issues
-    if logger.handlers:  # Clear existing handlers unconditionally
+    # Clear existing handlers to avoid duplicated logs
+    if logger.handlers:
         logger.handlers.clear()
 
-    # Prevent duplicate handlers
-    # Console logging handler
+    # Console handler
     console_handler = logging.StreamHandler(sys.stderr)
     console_handler.setLevel(console_level)
-    console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+    console_formatter = logging.Formatter(log_format)
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
 
-    # Rotating file logging handler
-    file_handler = RotatingFileHandler(log_file_path, maxBytes=5 * 1024 * 1024, backupCount=3)
+    # Rotating file handler
+    file_handler = RotatingFileHandler(log_file_path, maxBytes=max_file_size, backupCount=backup_count)
     file_handler.setLevel(file_level)
-    file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+    file_formatter = logging.Formatter(log_format)
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
 

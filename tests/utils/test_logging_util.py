@@ -1,129 +1,105 @@
 import os
+import pytest
 import logging
 from src.utils.logging_util import setup_logger
+from src.utils.config_util import ConfigUtil
 
 
-def close_logger_handlers(logger_name):
+@pytest.fixture
+def valid_log_dir(tmp_path):
     """
-    Helper function to close and remove handlers from a logger to prevent locking issues.
+    Fixture to provide a temporary log directory for testing.
     """
-    logger = logging.getLogger(logger_name)
-    while logger.handlers:
-        handler = logger.handlers[0]
-        handler.close()
-        logger.removeHandler(handler)
+    return tmp_path / "logs"
 
 
-def test_setup_logger_creates_logger():
+def test_setup_logger_creates_handlers(valid_log_dir):
     """
-    Test that `setup_logger` creates a valid logger instance.
+    Test that `setup_logger` creates a logger with the appropriate handlers.
     """
-    logger_name = "test_logger"
-    logger = setup_logger(logger_name)
+    # Prepare a mock config
+    ConfigUtil._config = {
+        "logging": {
+            "log_dir": str(valid_log_dir),
+            "log_file_name": "test_app.log",
+            "max_file_size": 10000,
+            "backup_count": 2,
+            "log_level_console": "DEBUG",
+            "log_level_file": "INFO",
+            "log_format": "%(asctime)s - %(levelname)s - %(message)s",
+        },
+        "meta": {}
+    }
+
+    logger = setup_logger("test_logger")
     handlers = logger.handlers
-    print(f"Logger handlers: {handlers}")
-    # Ensure both StreamHandler and RotatingFileHandler are attached
+
+    # Check that logger has a StreamHandler and a RotatingFileHandler
     assert any(isinstance(h, logging.StreamHandler) for h in handlers), "StreamHandler not attached!"
     assert any(
         isinstance(h, logging.handlers.RotatingFileHandler) for h in handlers), "RotatingFileHandler not attached!"
-    close_logger_handlers(logger_name)
 
 
-def test_logger_logs_to_file():
+def test_logging_to_file(valid_log_dir):
     """
-    Test that logs are written to the default `logs/app.log` file.
+    Test that log messages are written to the correct log file.
     """
-    # Default log file path
-    log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../logs"))
-    log_file = os.path.join(log_dir, "app.log")
+    # Prepare a mock config
+    ConfigUtil._config = {
+        "logging": {
+            "log_dir": str(valid_log_dir),
+            "log_file_name": "test_app.log",
+            "max_file_size": 10000,
+            "backup_count": 2,
+            "log_level_console": "DEBUG",
+            "log_level_file": "INFO",
+            "log_format": "%(asctime)s - %(levelname)s - %(message)s",
+        },
+        "meta": {}
+    }
 
-    # Ensure the logs directory is clean for testing
-    if os.path.exists(log_file):
-        os.remove(log_file)
+    logger = setup_logger("file_logger")
+    test_message = "This is a test log message."
 
-    logger_name = "test_file_logger"
-    logger = setup_logger(logger_name, file_level=logging.INFO)
-
-    test_message = "Test file log message"
-    # Log a message
+    # Log the message
     logger.info(test_message)
 
-    # Debugging: Verify log directory and file creation
-    print(f"Log directory exists: {os.path.exists(log_dir)}, Log file exists: {os.path.exists(log_file)}")
+    # Check if the message was logged
+    log_file_path = os.path.join(valid_log_dir, "test_app.log")
+    assert os.path.exists(log_file_path), "Log file was not created."
 
-    # Verify the log file is created
-    assert os.path.exists(log_file), "Log file was not created in the expected location."
-
-    # Check that the file contains the log message
-    with open(log_file, "r") as f:
+    with open(log_file_path, "r") as f:
         log_content = f.read()
-    assert test_message in log_content, "Log message not found in the log file!"
-
-    # Cleanup logger and file
-    close_logger_handlers(logger_name)
+    assert test_message in log_content, "Log message not found in the log file."
 
 
-def test_logger_creates_logs_directory():
+def test_log_rotation(valid_log_dir):
     """
-    Test that the `logs/` directory is automatically created if it doesn't exist.
+    Test that log files are rotated when the size limit is exceeded.
     """
-    # Default logs directory
-    log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../logs"))
+    # Prepare a mock config for small log size to trigger rotation
+    ConfigUtil._config = {
+        "logging": {
+            "log_dir": str(valid_log_dir),
+            "log_file_name": "rotation_test.log",
+            "max_file_size": 100,
+            "backup_count": 2,
+            "log_level_console": "DEBUG",
+            "log_level_file": "INFO",
+            "log_format": "%(asctime)s - %(message)s",
+        },
+        "meta": {}
+    }
 
-    # Ensure the logs directory is clean for testing
-    if os.path.exists(log_dir):
-        for file in os.listdir(log_dir):
-            file_path = os.path.join(log_dir, file)
-            os.remove(file_path)
-        os.rmdir(log_dir)
+    logger = setup_logger("rotation_logger")
 
-    # Ensure directory doesn't exist before logger initialization
-    assert not os.path.exists(log_dir)
+    # Write enough log messages to exceed the file size limit and trigger rotation
+    for i in range(50):
+        logger.info(f"Log message {i}")
 
-    # Initialize logger
-    logger_name = "test_dir_creation_logger"
-    logger = setup_logger(logger_name)
-    print(f"Logger initialized for directory creation test at {log_dir}")
-    handlers = logger.handlers
+    log_file_path = os.path.join(valid_log_dir, "rotation_test.log")
+    rotated_file = os.path.join(valid_log_dir, "rotation_test.log.1")
 
-    # Ensure handlers are attached
-    assert len(handlers) > 0, "Logger handlers are not attached!"
-    # Verify the logs directory was created
-    assert os.path.exists(log_dir), "Logs directory was not created!"
-
-    # Cleanup logger
-    close_logger_handlers(logger_name)
-
-
-def test_log_rotation():
-    """
-    Test that `setup_logger` correctly rotates log files when the size limit is reached.
-    """
-    # Default logs directory
-    log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../logs"))
-    log_file = os.path.join(log_dir, "app.log")
-
-    # Ensure the logs directory and log file are clean
-    if os.path.exists(log_file):
-        os.remove(log_file)
-
-    logger_name = "test_rotation_logger"
-    logger = setup_logger(logger_name, file_level=logging.INFO)
-    test_message = "Rotating log message"
-
-    # Log enough data to trigger rotation (5MB limit in logging_util.py)
-    for i in range(10000):  # Write enough logs to exceed 5MB
-        logger.info(f"{test_message} {i}")
-
-    # Debugging: Verify log rotation
-    print(f"Log file exists: {os.path.exists(log_file)}, Backup file exists: {os.path.exists(f'{log_file}.1')}")
-    print(f"Backup file 1 exists: {os.path.exists(f'{log_file}.1')}")
-    print(f"Backup file 2 exists: {os.path.exists(f'{log_file}.2')}")
-
-    # Check the main log file and backup file rotation
-    assert os.path.exists(log_file), "Main log file does not exist after logging messages."
-    assert os.path.exists(f"{log_file}.1"), "Rotated log file (.1) was not created."
-    assert os.path.exists(f"{log_file}.2"), "Rotated log file (.2) was not created."
-
-    # Cleanup logger
-    close_logger_handlers(logger_name)
+    # Verify rotation
+    assert os.path.exists(log_file_path), "Main log file does not exist."
+    assert os.path.exists(rotated_file), "Rotated log file .1 was not created."
