@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Infinite Scroll Test Page</title>
+    <style>
+        /* Basic styling */
+        body {{
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }}
+        /* Additional styling here */
+    </style>
+</head>
+<body>
+    <h1>Infinite Scroll Test Page</h1>
+    
+                        <div class="content-container">
+                            <div class="content-item" data-id="1">Item 1</div>
+                            <div class="content-item" data-id="2">Item 2</div>
+                            <div class="content-item" data-id="3">Item 3</div>
+                            <div class="content-item" data-id="4">Item 4</div>
+                            <div class="content-item" data-id="5">Item 5</div>
+                        </div>
+                        <div id="loader" class="loader">Loading...</div>
+                        
+    <script>
+        // JavaScript for interactive elements
+        
+                        let itemCount = 5;
+
+                        function loadMoreItems() {
+                            const container = document.querySelector('.content-container');
+                            const loader = document.getElementById('loader');
+
+                            loader.style.display = 'block';
+
+                            // Simulate network delay
+                            setTimeout(() => {
+                                // Add 5 more items
+                                for (let i = 0; i < 5; i++) {
+                                    itemCount++;
+                                    const item = document.createElement('div');
+                                    item.className = 'content-item';
+                                    item.dataset.id = itemCount;
+                                    item.textContent = `Item ${itemCount}`;
+                                    container.appendChild(item);
+                                }
+
+                                loader.style.display = 'none';
+                            }, 800);
+                        }
+
+                        // Set up infinite scroll
+                        window.addEventListener('scroll', function() {
+                            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+                                loadMoreItems();
+                            }
+                        });
+                        
+    </script>
+</body>
+</html>

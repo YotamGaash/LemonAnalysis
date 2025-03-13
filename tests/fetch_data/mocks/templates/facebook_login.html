@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook Login Mock</title>
+    <style>
+        /* Basic styling */
+        body {{
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }}
+        /* Additional styling here */
+    </style>
+</head>
+<body>
+    <h1>Facebook Login Mock</h1>
+    
+                        <form class="login-form">
+                            <div>
+                                <label for="email">Email or Phone:</label>
+                                <input type="text" id="email" name="email" required>
+                            </div>
+                            <div>
+                                <label for="password">Password:</label>
+                                <input type="password" id="password" name="password" required>
+                            </div>
+                            <button type="submit" id="login-button">Log In</button>
+                        </form>
+                        
+    <script>
+        // JavaScript for interactive elements
+        
+                        document.querySelector('.login-form').addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            const email = document.getElementById('email').value;
+                            const password = document.getElementById('password').value;
+
+                            if (email === 'test@example.com' && password === 'password123') {
+                                // Successful login
+                                localStorage.setItem('mockLoginSuccess', 'true');
+                                window.location.href = '/facebook/feed';
+                            } else {
+                                // Failed login
+                                alert('Invalid credentials');
+                            }
+                        });
+                        
+    </script>
+</body>
+</html>

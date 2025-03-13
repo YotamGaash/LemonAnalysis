@@ -1,0 +1,69 @@
+{
+  "fetcher": {
+    "default_platform": "facebook",
+    "timeout": 60000,
+    "stealth_mode": true
+  },
+  "authentication": {
+    "method": "credential",
+    "cookies_path": "data/cookies",
+    "tokens_path": "data/tokens"
+  },
+  "platforms": {
+    "facebook": {
+      "base_url": "https://www.facebook.com",
+      "login_url": "https://www.facebook.com/login",
+      "selectors": {
+        "email_field": "#email",
+        "password_field": "#pass",
+        "login_button": "[data-testid='royal_login_button']",
+        "feed_posts": "[data-pagelet='FeedUnit']"
+      }
+    },
+    "twitter": {
+      "base_url": "https://twitter.com",
+      "login_url": "https://twitter.com/i/flow/login",
+      "selectors": {
+        "username_field": "input[name='text']",
+        "password_field": "input[name='password']",
+        "login_button": "div[data-testid='LoginForm_Login_Button']",
+        "tweets": "article[data-testid='tweet']"
+      }
+    }
+  },
+  "stealth": {
+    "user_agent_rotation": true,
+    "fingerprint_spoofing": true,
+    "proxy": {
+      "enabled": false,
+      "rotation_interval": 600,
+      "proxy_list": []
+    },
+    "human_behavior": {
+      "enabled": true,
+      "min_delay": 500,
+      "max_delay": 3000
+    }
+  },
+  "meta": {
+    "fetcher.default_platform": {
+      "type": "str",
+      "default": "facebook",
+      "choices": [
+        "facebook",
+        "twitter",
+        "instagram",
+        "linkedin"
+      ]
+    },
+    "fetcher.timeout": {
+      "type": "int",
+      "default": 60000,
+      "min": 1000
+    },
+    "fetcher.stealth_mode": {
+      "type": "bool",
+      "default": true
+    }
+  }
+}

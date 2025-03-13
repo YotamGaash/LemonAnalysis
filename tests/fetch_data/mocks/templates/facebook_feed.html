@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook Feed Mock</title>
+    <style>
+        /* Basic styling */
+        body {{
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }}
+        /* Additional styling here */
+    </style>
+</head>
+<body>
+    <h1>Facebook Feed Mock</h1>
+    
+                        <div class="feed-container">
+                            <div class="post" data-id="1">
+                                <div class="post-header">User One</div>
+                                <div class="post-content">This is post content 1</div>
+                            </div>
+                            <div class="post" data-id="2">
+                                <div class="post-header">User Two</div>
+                                <div class="post-content">This is post content 2</div>
+                            </div>
+                            <!-- Initial posts -->
+                        </div>
+                        <div id="feed-loader">Loading more posts...</div>
+                        
+    <script>
+        // JavaScript for interactive elements
+        
+                        // Check if logged in
+                        if (!localStorage.getItem('mockLoginSuccess')) {
+                            window.location.href = '/facebook/login';
+                        }
+
+                        // Infinite scroll functionality
+                        let postCount = 2;
+
+                        function loadMorePosts() {
+                            const feedContainer = document.querySelector('.feed-container');
+
+                            // Add 3 more posts
+                            for (let i = 0; i < 3; i++) {
+                                postCount++;
+                                const post = document.createElement('div');
+                                post.className = 'post';
+                                post.dataset.id = postCount;
+                                post.innerHTML = `
+                                    <div class="post-header">User ${postCount}</div>
+                                    <div class="post-content">This is post content ${postCount}</div>
+                                `;
+                                feedContainer.appendChild(post);
+                            }
+                        }
+
+                        // Detect scroll to bottom
+                        window.addEventListener('scroll', function() {
+                            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+                                loadMorePosts();
+                            }
+                        });
+                        
+    </script>
+</body>
+</html>

@@ -1,7 +1,10 @@
 import logging
 import os
 import sys
+import traceback
 from logging.handlers import RotatingFileHandler
+from typing import Optional
+
 from src.utils.config_util import ConfigUtil
 
 
@@ -16,14 +19,26 @@ def setup_logger(logger_name: str) -> logging.Logger:
     Returns:
         logging.Logger: A configured logger instance.
     """
+    # If logger already exists with handlers, return it
+    logger = logging.getLogger(logger_name)
+    if logger.handlers:
+        return logger
+
     # Fetch logging configuration from ConfigUtil
-    log_dir = ConfigUtil.get("logging.log_dir")
-    log_file_name = ConfigUtil.get("logging.log_file_name")
-    max_file_size = ConfigUtil.get("logging.max_file_size")
-    backup_count = ConfigUtil.get("logging.backup_count")
-    console_level = getattr(logging, ConfigUtil.get("logging.log_level_console"))
-    file_level = getattr(logging, ConfigUtil.get("logging.log_level_file"))
-    log_format = ConfigUtil.get("logging.log_format")
+    log_dir = ConfigUtil.get("logging.log_dir", "logs")
+    log_file_name = ConfigUtil.get("logging.log_file_name", "app.log")
+    max_file_size = ConfigUtil.get("logging.max_file_size",
+                                   5242880)  # 5 MB default
+    backup_count = ConfigUtil.get("logging.backup_count", 3)
+
+    # Get log levels with safe fallbacks
+    console_level_name = ConfigUtil.get("logging.log_level_console", "DEBUG")
+    file_level_name = ConfigUtil.get("logging.log_level_file", "INFO")
+    console_level = getattr(logging, console_level_name)
+    file_level = getattr(logging, file_level_name)
+
+    log_format = ConfigUtil.get("logging.log_format",
+                                "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
     # Ensure the log directory exists
     os.makedirs(log_dir, exist_ok=True)
@@ -32,7 +47,6 @@ def setup_logger(logger_name: str) -> logging.Logger:
     log_file_path = os.path.join(log_dir, log_file_name)
 
     # Initialize the logger
-    logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG)  # Set root logger level to DEBUG
 
     # Clear existing handlers to avoid duplicated logs
@@ -47,7 +61,8 @@ def setup_logger(logger_name: str) -> logging.Logger:
     logger.addHandler(console_handler)
 
     # Rotating file handler
-    file_handler = RotatingFileHandler(log_file_path, maxBytes=max_file_size, backupCount=backup_count)
+    file_handler = RotatingFileHandler(log_file_path, maxBytes=max_file_size,
+                                       backupCount=backup_count)
     file_handler.setLevel(file_level)
     file_formatter = logging.Formatter(log_format)
     file_handler.setFormatter(file_formatter)
@@ -56,13 +71,19 @@ def setup_logger(logger_name: str) -> logging.Logger:
     return logger
 
 
-def log_exception(logger: logging.Logger, ex: Exception, message: str = "An error occurred"):
+def log_exception(logger: logging.Logger, exc: Optional[Exception],
+                  message: str) -> None:
     """
-    Logs an exception with traceback.
+    Log an exception with detailed traceback and a custom message.
 
     Args:
-        logger (logging.Logger): Logger instance to log with.
-        ex (Exception): Exception instance to log.
-        message (str): Optional message to provide context (default is "An error occurred").
+        logger: Logger instance to use
+        exc: Exception object to log
+        message: Custom message to add to the log
     """
-    logger.error(message, exc_info=True)
+    if exc is None:
+        logger.error(message)
+        return
+
+    logger.error(f"{message}: {str(exc)}")
+    logger.debug(f"Exception details: {traceback.format_exc()}")
