@@ -1,6 +1,9 @@
+import json
+import os
+import time
 from abc import ABC, abstractmethod
 from contextlib import AbstractContextManager
-import logging
+from src.utils.logging_util import setup_logger, log_exception
 from typing import Optional, Dict, Any, Union
 
 from playwright.sync_api import Page, Error as PlaywrightError
@@ -12,7 +15,7 @@ from src.fetch_data.exceptions import (
     FetchingError, ExtractionError
 )
 
-class BaseFetcher(ABC, AbstractContextManager):
+class BaseFetcher(AbstractContextManager):
     """
     Base class for all data fetchers.
 
@@ -157,6 +160,100 @@ class BaseFetcher(ABC, AbstractContextManager):
             self.page = None
             self.is_initialized = False
             self.logger.info(f"Closed {self.__class__.__name__} resources")
+
+    def _retry(self, func, attempts=None, exceptions=(Exception,), delay=2,
+               *args,
+               **kwargs):
+        """Generic retry mechanism for safe operations."""
+        attempts = attempts or self.retry_attempts
+        for attempt in range(1, attempts + 1):
+            try:
+                return func(*args, **kwargs)
+            except exceptions as e:
+                if attempt < attempts:
+                    self.logger.warning(
+                        f"[{self.platform}] Attempt {attempt}/{attempts} failed: {e}, retrying...")
+                    time.sleep(delay)
+                else:
+                    log_exception(self.logger, e,
+                                  f"All {attempts} retry attempts failed for operation")
+                    raise FetchingError(
+                        f"Operation failed after {attempts} attempts") from e
+
+    @staticmethod
+    def sanitize_data(raw_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitizes or formats common types of data fields from raw extraction."""
+        sanitized_data = {}
+        for key, value in raw_data.items():
+            if isinstance(value, str):
+                sanitized_data[key] = value.strip()
+            else:
+                sanitized_data[key] = value
+        return sanitized_data
+
+    def handle_exception(self, exc: Exception, message: str):
+        """Logs and raises formatted exceptions."""
+        log_exception(self.logger, exc, message)
+        raise FetchingError(message) from exc
+
+    import json, os
+
+    def save_session(self, session_data: Dict[str, Any], path: str):
+        """Saves session data (cookies/tokens) to a file to reuse later sessions."""
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, 'w') as file:
+                json.dump(session_data, file, indent=2)
+            self.logger.debug(f"Session data saved successfully: {path}")
+        except Exception as e:
+            self.handle_exception(e, f"Failed saving session data: {path}")
+
+    def load_session(self, path: str) -> dict[Any, Any] | None | Any:
+        """Loads session data (cookies/tokens) from a file."""
+        if not os.path.exists(path):
+            self.logger.warning(f"Session file does not exist: {path}")
+            return {}
+
+        try:
+            with open(path, 'r') as file:
+                data = json.load(file)
+            self.logger.debug(f"Session data loaded successfully: {path}")
+            return data
+        except Exception as e:
+            self.handle_exception(e, f"Failed loading session data: {path}")
+
+    def health_check(self):
+        """Validates fetcher readiness."""
+        if not self.is_initialized or not self.page:
+            raise InitializationError(
+                f"{self.platform} fetcher not properly initialized.")
+
+        try:
+            _ = self.page.title()
+            self.logger.debug(f"{self.platform} fetcher health check passed.")
+        except Exception as e:
+            self.handle_exception(e,
+                                  f"{self.platform} fetcher health check failed.")
+
+    def capture_screenshot(self, path: str):
+        """Captures a screenshot and saves it to the provided path."""
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            self.page.screenshot(path=path)
+            self.logger.info(f"Captured screenshot: {path}")
+        except Exception as e:
+            self.handle_exception(e, "Screenshot capturing failed")
+
+    def wait_for_selector(self, selector: str, timeout=None):
+        """Wait for specified selector to be visible."""
+        timeout = timeout or self.timeout
+
+        def _wait():
+            self.page.wait_for_selector(selector, timeout=timeout)
+            self.logger.debug(
+                f"{self.platform}: Selector '{selector}' is visible")
+
+        self._retry(_wait, exceptions=(PlaywrightError,))
 
     def __enter__(self):
         """

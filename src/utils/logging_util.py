@@ -11,7 +11,7 @@ from src.utils.config_util import ConfigUtil
 def setup_logger(logger_name: str) -> logging.Logger:
     """
     Sets up and returns a logger instance with console and rotating file handlers.
-    All settings are fetched from the ConfigUtil.
+    All settings are fetched from ConfigUtil.
 
     Args:
         logger_name (str): The name of the logger.
@@ -25,20 +25,21 @@ def setup_logger(logger_name: str) -> logging.Logger:
         return logger
 
     # Fetch logging configuration from ConfigUtil
-    log_dir = ConfigUtil.get("logging.log_dir", "logs")
-    log_file_name = ConfigUtil.get("logging.log_file_name", "app.log")
-    max_file_size = ConfigUtil.get("logging.max_file_size",
-                                   5242880)  # 5 MB default
-    backup_count = ConfigUtil.get("logging.backup_count", 3)
+    config_util = ConfigUtil()  # Ensure instance
+    log_dir = config_util.get("logging.log_dir", "logs")
+    log_file_name = config_util.get("logging.log_file_name", "app.log")
+    max_file_size = config_util.get("logging.max_file_size",
+                                    5242880)  # 5 MB default
+    backup_count = config_util.get("logging.backup_count", 3)
 
     # Get log levels with safe fallbacks
-    console_level_name = ConfigUtil.get("logging.log_level_console", "DEBUG")
-    file_level_name = ConfigUtil.get("logging.log_level_file", "INFO")
-    console_level = getattr(logging, console_level_name)
-    file_level = getattr(logging, file_level_name)
+    console_level_name = config_util.get("logging.log_level_console", "DEBUG")
+    file_level_name = config_util.get("logging.log_level_file", "INFO")
+    console_level = getattr(logging, console_level_name.upper(), logging.DEBUG)
+    file_level = getattr(logging, file_level_name.upper(), logging.INFO)
 
-    log_format = ConfigUtil.get("logging.log_format",
-                                "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    log_format = config_util.get("logging.log_format",
+                                 "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
     # Ensure the log directory exists
     os.makedirs(log_dir, exist_ok=True)
@@ -69,7 +70,6 @@ def setup_logger(logger_name: str) -> logging.Logger:
     logger.addHandler(file_handler)
 
     return logger
-
 
 def log_exception(logger: logging.Logger, exc: Optional[Exception],
                   message: str) -> None:

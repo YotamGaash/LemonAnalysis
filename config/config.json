@@ -12,6 +12,14 @@
     "version": "1.0.0",
     "default_output_dir": "output"
   },
+  "storage_paths": {
+    "sessions_path": "data/sessions",
+    "screenshots_path": "data/screenshots",
+    "cache_path": "data/caches",
+    "raw_data_path": "data/raw",
+    "processed_data_path": "data/processed",
+    "proxies_path": "data/proxies"
+  },
   "constants": {
     "timeout": 30,
     "retrieval_attempts": 3,
@@ -38,13 +46,11 @@
     },
     "logging.log_level_console": {
       "type": "str",
-      "default": "DEBUG",
-      "choices": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+      "default": "DEBUG"
     },
     "logging.log_level_file": {
       "type": "str",
-      "default": "INFO",
-      "choices": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+      "default": "INFO"
     },
     "constants.timeout": {
       "type": "int",
@@ -58,7 +64,7 @@
     },
     "constants.api_url": {
       "type": "str",
-      "default": ""
+      "default": "https://example.com/api"
     }
   }
 }

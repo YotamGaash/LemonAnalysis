@@ -1,8 +1,32 @@
+import json
 import os
 import pytest
 import logging
 from src.utils.logging_util import setup_logger
 from src.utils.config_util import ConfigUtil
+
+@pytest.fixture
+def mock_config_util(tmp_path):
+    """
+    Provide a temporary configuration for testing logging utility.
+    """
+    config = {
+        "logging": {
+            "log_dir": str(tmp_path / "logs"),
+            "log_file_name": "test_app.log",
+            "max_file_size": 1000,
+            "backup_count": 1,
+            "log_level_console": "DEBUG",
+            "log_level_file": "INFO",
+            "log_format": "%(asctime)s - %(levelname)s - %(message)s"
+        }
+    }
+    config_path = tmp_path / "config.json"
+    with open(config_path, "w") as f:
+        json.dump(config, f)
+    ConfigUtil(
+        main_config=config_path)  # Initialize ConfigUtil with temp config
+    return ConfigUtil()
 
 
 @pytest.fixture
@@ -13,64 +37,39 @@ def valid_log_dir(tmp_path):
     return tmp_path / "logs"
 
 
-def test_setup_logger_creates_handlers(valid_log_dir):
+def test_setup_logger_creates_handlers(mock_config_util):
     """
     Test that `setup_logger` creates a logger with the appropriate handlers.
     """
-    # Prepare a mock config
-    ConfigUtil._config = {
-        "logging": {
-            "log_dir": str(valid_log_dir),
-            "log_file_name": "test_app.log",
-            "max_file_size": 10000,
-            "backup_count": 2,
-            "log_level_console": "DEBUG",
-            "log_level_file": "INFO",
-            "log_format": "%(asctime)s - %(levelname)s - %(message)s",
-        },
-        "meta": {}
-    }
-
     logger = setup_logger("test_logger")
     handlers = logger.handlers
 
-    # Check that logger has a StreamHandler and a RotatingFileHandler
-    assert any(isinstance(h, logging.StreamHandler) for h in handlers), "StreamHandler not attached!"
+    # Assert correct handlers are attached
+    assert any(isinstance(h, logging.StreamHandler) for h in
+               handlers), "StreamHandler not attached!"
     assert any(
-        isinstance(h, logging.handlers.RotatingFileHandler) for h in handlers), "RotatingFileHandler not attached!"
+        isinstance(h, logging.handlers.RotatingFileHandler) for h in
+        handlers), "RotatingFileHandler not attached!"
 
 
-def test_logging_to_file(valid_log_dir):
+
+def test_logging_to_file(mock_config_util):
     """
     Test that log messages are written to the correct log file.
     """
-    # Prepare a mock config
-    ConfigUtil._config = {
-        "logging": {
-            "log_dir": str(valid_log_dir),
-            "log_file_name": "test_app.log",
-            "max_file_size": 10000,
-            "backup_count": 2,
-            "log_level_console": "DEBUG",
-            "log_level_file": "INFO",
-            "log_format": "%(asctime)s - %(levelname)s - %(message)s",
-        },
-        "meta": {}
-    }
-
     logger = setup_logger("file_logger")
     test_message = "This is a test log message."
 
     # Log the message
     logger.info(test_message)
 
-    # Check if the message was logged
-    log_file_path = os.path.join(valid_log_dir, "test_app.log")
+    log_file_path = mock_config_util.get("logging.log_dir") + "/test_app.log"
     assert os.path.exists(log_file_path), "Log file was not created."
 
     with open(log_file_path, "r") as f:
         log_content = f.read()
     assert test_message in log_content, "Log message not found in the log file."
+
 
 
 def test_log_rotation(valid_log_dir):

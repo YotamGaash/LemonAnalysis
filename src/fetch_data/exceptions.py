@@ -41,3 +41,17 @@ class ScrollingError(FetcherError):
 class StealthError(FetcherError):
     """Raised when there's an error with stealth measures."""
     pass
+
+
+class FetchError(FetcherError):
+    """Raised for all fetch errors."""
+    pass
+
+
+class SessionError(FetcherError):
+    """Raised for all session errors."""
+    pass
+
+class PlaywrightError(FetcherError):
+    """Raised for all playwright errors."""
+    pass
