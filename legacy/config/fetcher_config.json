@@ -1,0 +1,137 @@
+{
+  "fetcher": {
+    "default_platform": "facebook",
+    "timeout": 60000,
+    "stealth_mode": true,
+    "screenshot_on_error": true,
+    "save_session_on_exit": true,
+    "load_session_on_start": true,
+    "retry_attempts": 3,
+    "error_retry_delay_ms": 5000
+  },
+  "authentication": {
+    "method": "credential",
+    "cookies_path": "data/sessions",
+    "tokens_path": "data/tokens",
+    "session_validity_days": 7,
+    "auto_renew_session": true
+  },
+  "stealth": {
+    "user_agent_rotation": true,
+    "fingerprint_spoofing": true,
+    "proxy": {
+      "enabled": false,
+      "rotation_interval": 600,
+      "proxy_list_path": "data/proxies/proxy_list.json"
+    },
+    "human_behavior": {
+      "enabled": true,
+      "min_delay": 500,
+      "max_delay": 3000
+    }
+  },
+  "platforms": {
+    "facebook": {
+      "base_url": "https://facebook.com",
+      "login_url": "https://facebook.com/login",
+      "selectors": {
+        "login": {
+          "email_field": "#email",
+          "password_field": "#pass",
+          "login_button": "[data-testid='royal_login_button']",
+          "error_box": "#error_box",
+          "logged_in_indicator": "[data-testid='bookmark_nav']"
+        },
+        "checkpoint": {
+          "2fa_input": "[name='approvals_code']",
+          "2fa_submit": "#checkpointSubmitButton",
+          "review_login": "#checkpointSubmitButton",
+          "save_device": "[name='name_action_selected']",
+          "continue_button": "#checkpointSubmitButton"
+        },
+        "feed": {
+          "posts": "[data-pagelet='FeedUnit']",
+          "comments": "[data-testid='UFI2CommentsList']",
+          "reactions": "[data-testid='UFI2ReactionsCount']"
+        }
+      },
+      "timeouts": {
+        "login": 30000,
+        "checkpoint": 20000,
+        "verification": 15000,
+        "action": 10000
+      },
+      "session": {
+        "storage_path": "data/sessions/facebook",
+        "cookies_file": "cookies.json",
+        "storage_state_file": "storage.json",
+        "max_age_days": 7
+      },
+      "rate_limits": {
+        "max_requests_per_hour": 100,
+        "delay_between_requests": 1000
+      }
+    }
+  },
+  "meta": {
+    "fetcher.default_platform": {
+      "type": "str",
+      "default": "facebook",
+      "description": "Default platform to use for fetching"
+    },
+    "fetcher.timeout": {
+      "type": "int",
+      "default": 60000,
+      "min": 1000,
+      "description": "Global timeout for operations in milliseconds"
+    },
+    "fetcher.stealth_mode": {
+      "type": "bool",
+      "default": true,
+      "description": "Enable stealth mode features"
+    },
+    "authentication.method": {
+      "type": "str",
+      "default": "credential",
+      "options": ["credential", "cookie", "token"],
+      "description": "Authentication method to use"
+    },
+    "authentication.session_validity_days": {
+      "type": "int",
+      "default": 7,
+      "min": 1,
+      "max": 30,
+      "description": "Number of days before session is considered invalid"
+    },
+    "authentication.auto_renew_session": {
+      "type": "bool",
+      "default": true,
+      "description": "Automatically renew session before expiration"
+    },
+    "platforms.facebook.timeouts.login": {
+      "type": "int",
+      "default": 30000,
+      "min": 5000,
+      "description": "Timeout for login operation"
+    },
+    "platforms.facebook.timeouts.checkpoint": {
+      "type": "int",
+      "default": 20000,
+      "min": 5000,
+      "description": "Timeout for checkpoint handling"
+    },
+    "platforms.facebook.session.max_age_days": {
+      "type": "int",
+      "default": 7,
+      "min": 1,
+      "max": 30,
+      "description": "Maximum age of session files in days"
+    },
+    "platforms.facebook.rate_limits.max_requests_per_hour": {
+      "type": "int",
+      "default": 100,
+      "min": 1,
+      "description": "Maximum number of requests per hour"
+    }
+  }
+}
