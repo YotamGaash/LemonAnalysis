@@ -1,0 +1,1281 @@
+
+================================================================================
+File: base_fetcher.py
+================================================================================
+
+import json
+import os
+import time
+from abc import ABC, abstractmethod
+from contextlib import AbstractContextManager
+from src.utils.logging_util import setup_logger, log_exception
+from typing import Optional, Dict, Any, Union
+
+from playwright.sync_api import Page, Error as PlaywrightError
+
+from src.utils.config_util import ConfigUtil
+from src.utils.logging_util import setup_logger, log_exception
+from src.fetch_data.exceptions import (
+    FetcherError, InitializationError, ConfigurationError,
+    FetchingError, ExtractionError
+)
+
+class BaseFetcher(AbstractContextManager):
+    """
+    Base class for all data fetchers.
+
+    This abstract class defines the interface and common functionality for all platform-specific
+    data fetchers. It handles configuration management, logging, error handling, and resource
+    management.
+    """
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """
+        Initialize the base fetcher.
+
+        Args:
+            config: Optional custom configuration that overrides default settings.
+        """
+        # Setup logger
+        from src.utils.logging_util import setup_logger
+        self.logger = setup_logger(f"{self.__class__.__name__}")
+        self.logger.info(f"Initializing {self.__class__.__name__}")
+
+        # Initialize with empty config (will be populated in _load_config)
+        self.config = {}
+
+        # Determine platform early (needed for _load_config)
+        if config and "platform" in config:
+            self.platform = config["platform"]
+        else:
+            from src.utils.platform_util import determine_platform
+            self.platform = determine_platform(config)
+
+        # Load configuration
+        self._load_config(config)
+
+        # Initialize core attributes
+        self.page: Optional[Page] = None
+        self.is_initialized = False
+
+        # Timeout settings
+        self.timeout = self.config.get("timeout",
+                                       ConfigUtil.get("fetcher.timeout",
+                                                      60000))
+        self.retry_attempts = self.config.get(
+            "retry_attempts",
+            ConfigUtil.get("constants.retrieval_attempts", 3)
+        )
+
+    def _load_config(self,
+                     custom_config: Optional[Dict[str, Any]] = None) -> None:
+        """Load configuration settings from ConfigUtil and custom overrides."""
+        try:
+            # Merge with platform-specific configuration
+            platform_config = ConfigUtil.get("platforms", {})
+            if self.platform in platform_config:
+                self.config.update(platform_config.get(self.platform, {}))
+
+            # Merge with fetcher general config
+            fetcher_config = ConfigUtil.get("fetcher", {})
+            self.config.update(fetcher_config)
+
+            # Apply any custom configuration (highest priority)
+            if custom_config:
+                self.config.update(custom_config)
+
+            self.logger.debug(
+                f"Configuration loaded for {self.__class__.__name__}")
+        except Exception as e:
+            from src.fetch_data.exceptions import ConfigurationError
+            from src.utils.logging_util import log_exception
+
+            error_msg = f"Error loading configuration: {str(e)}"
+            log_exception(self.logger, e, "Error loading configuration")
+            raise ConfigurationError(error_msg) from e
+
+    @abstractmethod
+    def initialize(self, page: Page) -> None:
+        """
+        Initialize the fetcher with a Playwright page.
+
+        Args:
+            page: Playwright page object to use for web interactions
+
+        Raises:
+            InitializationError: If page is None
+        """
+        if page is None:
+            raise InitializationError("Page cannot be None")
+
+        self.page = page
+        self.is_initialized = True
+        self.logger.info(
+            f"Initialized {self.__class__.__name__} with Playwright page")
+
+    @abstractmethod
+    def fetch(self, query: str, **kwargs) -> Any:
+        """
+        Main method to fetch data from the source.
+
+        This method should be implemented by subclasses to perform the actual data fetching.
+
+        Args:
+            query: The search query or identifier for the data to fetch
+            **kwargs: Additional parameters specific to the fetcher implementation
+
+        Returns:
+            The fetched data in a format specific to the implementation
+
+        Raises:
+            FetchingError: If fetcher not initialized
+            NotImplementedError: If not implemented by subclass
+        """
+        if not self.is_initialized:
+            raise FetchingError(
+                "Fetcher must be initialized before fetching data")
+
+    @abstractmethod
+    def extract(self, element) -> Dict[str, Any]:
+        """
+        Extract structured data from elements.
+
+        Args:
+            element: The element to extract data from (type depends on implementation)
+
+        Returns:
+            Dictionary containing the extracted data
+
+        Raises:
+            NotImplementedError: If not implemented by subclass
+        """
+        pass
+
+    def close(self) -> None:
+        """
+        Clean up resources used by the fetcher.
+        """
+        try:
+            if self.page:
+                self.logger.debug("Closing Playwright page")
+                self.page.close()
+        except PlaywrightError as e:
+            self.logger.warning(f"Error while closing page: {str(e)}")
+        finally:
+            self.page = None
+            self.is_initialized = False
+            self.logger.info(f"Closed {self.__class__.__name__} resources")
+
+    def _retry(self, func, attempts=None, exceptions=(Exception,), delay=2,
+               *args,
+               **kwargs):
+        """Generic retry mechanism for safe operations."""
+        attempts = attempts or self.retry_attempts
+        for attempt in range(1, attempts + 1):
+            try:
+                return func(*args, **kwargs)
+            except exceptions as e:
+                if attempt < attempts:
+                    self.logger.warning(
+                        f"[{self.platform}] Attempt {attempt}/{attempts} failed: {e}, retrying...")
+                    time.sleep(delay)
+                else:
+                    log_exception(self.logger, e,
+                                  f"All {attempts} retry attempts failed for operation")
+                    raise FetchingError(
+                        f"Operation failed after {attempts} attempts") from e
+
+    @staticmethod
+    def sanitize_data(raw_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitizes or formats common types of data fields from raw extraction."""
+        sanitized_data = {}
+        for key, value in raw_data.items():
+            if isinstance(value, str):
+                sanitized_data[key] = value.strip()
+            else:
+                sanitized_data[key] = value
+        return sanitized_data
+
+    def handle_exception(self, exc: Exception, message: str):
+        """Logs and raises formatted exceptions."""
+        log_exception(self.logger, exc, message)
+        raise FetchingError(message) from exc
+
+    import json, os
+
+    def save_session(self, session_data: Dict[str, Any], path: str):
+        """Saves session data (cookies/tokens) to a file to reuse later sessions."""
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, 'w') as file:
+                json.dump(session_data, file, indent=2)
+            self.logger.debug(f"Session data saved successfully: {path}")
+        except Exception as e:
+            self.handle_exception(e, f"Failed saving session data: {path}")
+
+    def load_session(self, path: str) -> dict[Any, Any] | None | Any:
+        """Loads session data (cookies/tokens) from a file."""
+        if not os.path.exists(path):
+            self.logger.warning(f"Session file does not exist: {path}")
+            return {}
+
+        try:
+            with open(path, 'r') as file:
+                data = json.load(file)
+            self.logger.debug(f"Session data loaded successfully: {path}")
+            return data
+        except Exception as e:
+            self.handle_exception(e, f"Failed loading session data: {path}")
+
+    def health_check(self):
+        """Validates fetcher readiness."""
+        if not self.is_initialized or not self.page:
+            raise InitializationError(
+                f"{self.platform} fetcher not properly initialized.")
+
+        try:
+            _ = self.page.title()
+            self.logger.debug(f"{self.platform} fetcher health check passed.")
+        except Exception as e:
+            self.handle_exception(e,
+                                  f"{self.platform} fetcher health check failed.")
+
+    def capture_screenshot(self, path: str):
+        """Captures a screenshot and saves it to the provided path."""
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            self.page.screenshot(path=path)
+            self.logger.info(f"Captured screenshot: {path}")
+        except Exception as e:
+            self.handle_exception(e, "Screenshot capturing failed")
+
+    def wait_for_selector(self, selector: str, timeout=None):
+        """Wait for specified selector to be visible."""
+        timeout = timeout or self.timeout
+
+        def _wait():
+            self.page.wait_for_selector(selector, timeout=timeout)
+            self.logger.debug(
+                f"{self.platform}: Selector '{selector}' is visible")
+
+        self._retry(_wait, exceptions=(PlaywrightError,))
+
+    def __enter__(self):
+        """
+        Context manager entry point.
+
+        Returns:
+            Self
+        """
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Context manager exit point that ensures resources are properly cleaned up.
+
+        Args:
+            exc_type: Exception type if an exception was raised
+            exc_val: Exception value if an exception was raised
+            exc_tb: Exception traceback if an exception was raised
+
+        Returns:
+            False to propagate exceptions
+        """
+        if exc_type is not None:
+            log_exception(self.logger, exc_val,
+                          f"Error in {self.__class__.__name__}")
+
+        self.close()
+        return False  # Propagate any exceptions
+
+
+================================================================================
+File: exceptions.py
+================================================================================
+
+"""
+Custom exceptions used in the fetcher module.
+"""
+
+
+class FetcherError(Exception):
+    """Base class for all fetcher-related exceptions."""
+    pass
+
+
+class InitializationError(FetcherError):
+    """Raised when there's an error initializing a component."""
+    pass
+
+
+class ConfigurationError(FetcherError):
+    """Raised when there's an error with configuration."""
+    pass
+
+
+class FetchingError(FetcherError):
+    """Raised when there's an error fetching data."""
+    pass
+
+
+class ExtractionError(FetcherError):
+    """Raised when there's an error extracting data."""
+    pass
+
+
+class AuthenticationError(FetcherError):
+    """Raised when there's an error with authentication."""
+    pass
+
+
+class ScrollingError(FetcherError):
+    """Raised when there's an error with page scrolling."""
+    pass
+
+
+class StealthError(FetcherError):
+    """Raised when there's an error with stealth measures."""
+    pass
+
+
+class FetchError(FetcherError):
+    """Raised for all fetch errors."""
+    pass
+
+
+class SessionError(FetcherError):
+    """Raised for all session errors."""
+    pass
+
+class PlaywrightError(FetcherError):
+    """Raised for all playwright errors."""
+    pass
+
+================================================================================
+File: facebook_fetcher.py
+================================================================================
+
+from src.fetch_data.base_fetcher import BaseFetcher
+from src.utils.logging_util import setup_logger, log_exception
+from playwright.sync_api import Page, Error as PlaywrightError
+from src.utils.config_util import ConfigUtil
+import json
+import os
+import time
+from typing import Optional, Dict, Any
+
+
+class FacebookFetcher(BaseFetcher):
+    def __init__(self, config=None):
+        super().__init__(config)
+        self.logger = setup_logger(f"{self.__class__.__name__}")
+
+    def initialize(self, page: Page):
+        super().initialize(page)
+
+    def fetch(self, query, **kwargs):
+        # Implement Facebook-specific fetch logic here
+        self.logger.debug(f"Fetching data for query: {query}")
+        # Placeholder: Replace with actual fetching
+        return {}
+
+    def extract(self, element):
+        # Implement Facebook-specific extraction logic here
+        self.logger.debug(f"Extracting data from element")
+        # Placeholder: Replace with actual extraction
+        return {}
+
+    def sanitize_data(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
+        return super().sanitize_data(raw_data)
+
+    def handle_exception(self, exc: Exception, message: str):
+        return super().handle_exception(exc, message)
+
+    def save_session(self, session_data: Dict[str, Any], path: str):
+        return super().save_session(session_data, path)
+
+    def load_session(self, path: str) -> dict[Any, Any] | None | Any:
+        return super().load_session(path)
+
+    def health_check(self):
+        return super().health_check()
+
+    def capture_screenshot(self, path: str):
+        return super().capture_screenshot(path)
+
+    def wait_for_selector(self, selector: str, timeout=None):
+        return super().wait_for_selector(selector, timeout)
+
+    def _retry(self, func, attempts=None, exceptions=(Exception,), delay=2, *args, **kwargs):
+        return super()._retry(func, attempts, exceptions, delay, *args, **kwargs)
+
+    def __enter__(self):
+        return super().__enter__()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return super().__exit__(exc_type, exc_val, exc_tb)
+
+
+================================================================================
+File: fetcher_factory.py
+================================================================================
+
+from typing import Dict, Type
+from .base_fetcher import BaseFetcher
+
+class FetcherFactory:
+    """Factory for creating appropriate fetchers."""
+
+    _fetchers: Dict[str, Type[BaseFetcher]] = {}
+
+    @classmethod
+    def register(cls, fetcher_type: str, fetcher_class: Type[BaseFetcher]):
+        """Register a fetcher class with a type identifier."""
+        cls._fetchers[fetcher_type] = fetcher_class
+
+    @classmethod
+    def create(cls, fetcher_type: str, config=None):
+        """Create a fetcher of the specified type."""
+        if fetcher_type not in cls._fetchers:
+            raise ValueError(f"Unknown fetcher type: {fetcher_type}")
+
+        return cls._fetchers[fetcher_type](config)
+
+
+================================================================================
+File: fetch_data.py
+================================================================================
+
+
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)  # Change to False for visual browser
+    page = browser.new_page()
+    page.goto('https://example.com')
+    print(page.title())
+    browser.close()
+
+================================================================================
+File: fetch_posts.py
+================================================================================
+
+
+
+================================================================================
+File: instagram_fetcher.py
+================================================================================
+
+from .base_fetcher import BaseFetcher
+from playwright.sync_api import Page
+
+class InstagramFetcher(BaseFetcher):
+    """Fetcher for Instagram platform."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+        # Platform-specific initialization
+
+    def initialize(self, page: Page):
+        """Initialize the fetcher with a Playwright page."""
+        super().initialize(page)
+        # Platform-specific initialization
+
+    def fetch(self, query: str, **kwargs):
+        """Main method to fetch data from Instagram."""
+        # Implementation
+        pass
+
+    def extract(self, element):
+        """Extract data from Instagram elements."""
+        # Implementation
+        pass
+
+    def login(self, credentials):
+        """Log in to Instagram."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: linkedin_fetcher.py
+================================================================================
+
+from .base_fetcher import BaseFetcher
+from playwright.sync_api import Page
+
+class LinkedInFetcher(BaseFetcher):
+    """Fetcher for LinkedIn platform."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+        # Platform-specific initialization
+
+    def initialize(self, page: Page):
+        """Initialize the fetcher with a Playwright page."""
+        super().initialize(page)
+        # Platform-specific initialization
+
+    def fetch(self, query: str, **kwargs):
+        """Main method to fetch data from LinkedIn."""
+        # Implementation
+        pass
+
+    def extract(self, element):
+        """Extract data from LinkedIn elements."""
+        # Implementation
+        pass
+
+    def login(self, credentials):
+        """Log in to LinkedIn."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: twitter_fetcher.py
+================================================================================
+
+from .base_fetcher import BaseFetcher
+from playwright.sync_api import Page
+
+class TwitterFetcher(BaseFetcher):
+    """Fetcher for Twitter platform."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+        # Platform-specific initialization
+
+    def initialize(self, page: Page):
+        """Initialize the fetcher with a Playwright page."""
+        super().initialize(page)
+        # Platform-specific initialization
+
+    def fetch(self, query: str, **kwargs):
+        """Main method to fetch data from Twitter."""
+        # Implementation
+        pass
+
+    def extract(self, element):
+        """Extract data from Twitter elements."""
+        # Implementation
+        pass
+
+    def login(self, credentials):
+        """Log in to Twitter."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: __init__.py
+================================================================================
+
+# Package for data fetching modules.
+
+
+================================================================================
+File: strategies/__init__.py
+================================================================================
+
+
+"""
+Strategy pattern implementations for different aspects of data fetching.
+"""
+
+
+================================================================================
+File: strategies/authentication/base_auth.py
+================================================================================
+
+"""
+Base authentication strategy module for handling website login.
+"""
+from abc import ABC, abstractmethod
+from typing import Dict, Any, Optional
+
+from playwright.sync_api import Page, Error as PlaywrightError
+
+from src.utils.logging_util import setup_logger, log_exception
+from src.fetch_data.exceptions import AuthenticationError
+
+
+class BaseAuth(ABC):
+    """
+    Base authentication strategy class for handling login to various platforms.
+
+    This class defines the interface for authentication strategies and provides
+    common functionality for login operations.
+    """
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """
+        Initialize the authentication strategy.
+
+        Args:
+            config: Optional configuration dictionary
+        """
+        self.config = config or {}
+        self.logger = setup_logger(f"{self.__class__.__name__}")
+        self.page: Optional[Page] = None
+        self.is_authenticated = False
+
+    def initialize(self, page: Page) -> None:
+        """
+        Set the Playwright page object for this authentication strategy.
+
+        Args:
+            page: Playwright Page object
+
+        Raises:
+            ValueError: If page is None
+        """
+        if page is None:
+            raise ValueError("Page cannot be None")
+
+        self.page = page
+        self.logger.info(
+            f"Initialized {self.__class__.__name__} with Playwright page")
+
+    @abstractmethod
+    async def authenticate(self) -> bool:
+        """
+        Authenticate the user on the platform.
+
+        This method must be implemented by all authentication strategies.
+
+        Returns:
+            bool: True if authentication was successful, False otherwise
+
+        Raises:
+            AuthenticationError: If authentication fails
+            NotImplementedError: If not implemented by subclass
+        """
+        raise NotImplementedError(
+            "Authentication strategy must implement authenticate()")
+
+    def is_login_required(self) -> bool:
+        """
+        Check if login is required based on the current page state.
+
+        Returns:
+            bool: True if login is required, False if already logged in
+        """
+        if self.page is None:
+            self.logger.error(
+                "Page not initialized, cannot check login status")
+            return True
+
+        # Basic implementation, subclasses should override with specific logic
+        return not self.is_authenticated
+
+    def verify_login(self) -> bool:
+        """
+        Verify if the login was successful.
+
+        Returns:
+            bool: True if successfully logged in, False otherwise
+        """
+        # Basic implementation, subclasses should override with specific logic
+        return self.is_authenticated
+
+
+================================================================================
+File: strategies/authentication/cookie_auth.py
+================================================================================
+
+from .base_auth import BaseAuth
+
+class CookieAuth(BaseAuth):
+    """Authentication strategy using cookies."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+
+    def apply(self, page, **kwargs):
+        """Apply the CookieAuth strategy to the page."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: strategies/authentication/credential_auth.py
+================================================================================
+
+from .base_auth import BaseAuth
+
+class CredentialAuth(BaseAuth):
+    """Authentication strategy using username/password."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+
+    def apply(self, page, **kwargs):
+        """Apply the CredentialAuth strategy to the page."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: strategies/authentication/facebook_auth.py
+================================================================================
+
+from src.fetch_data.strategies.authentication.base_auth import BaseAuth
+from src.utils.config_util import ConfigUtil
+from src.utils.logging_util import setup_logger, log_exception
+from playwright.sync_api import Page, Error as PlaywrightError
+import time
+import os
+
+
+class FacebookAuthentication(BaseAuth):
+    def __init__(self, config=None):
+        super().__init__(config)
+        self.logger = setup_logger(f"{self.__class__.__name__}")
+        self.config = config or {}
+
+    def authenticate(self, page: Page):
+        username = ConfigUtil().get_from_env("facebook.username")
+        password = ConfigUtil().get_from_env("facebook.password")
+
+        if not username or not password:
+            raise ValueError("Facebook credentials not found in environment variables.")
+
+        try:
+            page.goto("https://www.facebook.com/login")
+            page.locator("#email").fill(username)
+            page.locator("#pass").fill(password)
+            page.locator("[name='login']").click()
+
+            # Basic success check (can be improved later)
+            page.wait_for_url("https://www.facebook.com/", timeout=30000)  # Check if redirected to homepage after login
+
+        except (PlaywrightError, Exception) as e:
+            log_exception(self.logger, e, "Facebook login failed")
+            raise
+
+
+================================================================================
+File: strategies/authentication/init.py
+================================================================================
+
+
+"""
+Authentication strategies for different platforms.
+"""
+from src.fetch_data.strategies.authentication.base_auth import BaseAuth
+
+__all__ = ["BaseAuth"]
+
+
+================================================================================
+File: strategies/authentication/token_auth.py
+================================================================================
+
+from .base_auth import BaseAuth
+
+class TokenAuth(BaseAuth):
+    """Authentication strategy using tokens."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+
+    def apply(self, page, **kwargs):
+        """Apply the TokenAuth strategy to the page."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: strategies/authentication/__init__.py
+================================================================================
+
+# Init file for package
+
+
+================================================================================
+File: strategies/scrolling/base_scroller.py
+================================================================================
+
+"""
+Base scrolling strategy module for handling page navigation.
+"""
+from abc import ABC, abstractmethod
+from typing import Dict, Any, Optional, List, Tuple, Union
+
+from playwright.sync_api import Page, Error as PlaywrightError
+
+from src.utils.logging_util import setup_logger, log_exception
+from src.fetch_data.exceptions import ScrollingError
+
+
+class BaseScroller(ABC):
+    """
+    Base scrolling strategy class for handling page scrolling on various platforms.
+
+    This class defines the interface for scrolling strategies and provides
+    common functionality for navigation operations.
+    """
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """
+        Initialize the scrolling strategy.
+
+        Args:
+            config: Optional configuration dictionary
+        """
+        self.config = config or {}
+        self.logger = setup_logger(f"{self.__class__.__name__}")
+        self.page: Optional[Page] = None
+
+        # Scrolling configuration
+        self.scroll_timeout = self.config.get("scroll_timeout",
+                                              30000)  # 30 seconds default
+        self.scroll_delay = self.config.get("scroll_delay",
+                                            1000)  # 1 second default
+        self.max_scroll_attempts = self.config.get("max_scroll_attempts", 10)
+
+    def initialize(self, page: Page) -> None:
+        """
+        Set the Playwright page object for this scrolling strategy.
+
+        Args:
+            page: Playwright Page object
+
+        Raises:
+            ValueError: If page is None
+        """
+        if page is None:
+            raise ValueError("Page cannot be None")
+
+        self.page = page
+        self.logger.info(
+            f"Initialized {self.__class__.__name__} with Playwright page")
+
+    @abstractmethod
+    async def scroll(self, target_items: int = 0, max_time: int = 0) -> bool:
+        """
+        Scroll the page to load more content.
+
+        This method must be implemented by all scrolling strategies.
+
+        Args:
+            target_items: Target number of items to load (0 for unlimited)
+            max_time: Maximum time in milliseconds to scroll (0 for unlimited)
+
+        Returns:
+            bool: True if scrolling was successful or reached limits, False if error
+
+        Raises:
+            ScrollingError: If scrolling fails
+            NotImplementedError: If not implemented by subclass
+        """
+        raise NotImplementedError("Scrolling strategy must implement scroll()")
+
+    async def scroll_to_element(self, selector: str) -> bool:
+        """
+        Scroll to a specific element on the page.
+
+        Args:
+            selector: CSS selector for the target element
+
+        Returns:
+            bool: True if element was found and scrolled to, False otherwise
+        """
+        if self.page is None:
+            self.logger.error("Page not initialized, cannot scroll to element")
+            return False
+
+        try:
+            element = await self.page.wait_for_selector(selector,
+                                                        timeout=self.scroll_timeout)
+            if element:
+                await element.scroll_into_view_if_needed()
+                return True
+        except PlaywrightError as e:
+            log_exception(self.logger, e,
+                          f"Error scrolling to element with selector '{selector}'")
+
+        return False
+
+    async def get_scroll_position(self) -> Dict[str, int]:
+        """
+        Get the current scroll position of the page.
+
+        Returns:
+            Dict containing scroll X and Y positions
+        """
+        if self.page is None:
+            self.logger.error(
+                "Page not initialized, cannot get scroll position")
+            return {"x": 0, "y": 0}
+
+        try:
+            scroll_position = await self.page.evaluate("""
+                () => {
+                    return {
+                        x: window.scrollX || window.pageXOffset,
+                        y: window.scrollY || window.pageYOffset
+                    }
+                }
+            """)
+            return scroll_position
+        except PlaywrightError as e:
+            log_exception(self.logger, e, "Error getting scroll position")
+            return {"x": 0, "y": 0}
+
+
+================================================================================
+File: strategies/scrolling/infinite_scroller.py
+================================================================================
+
+from .base_scroller import BaseScroller
+
+class InfiniteScroller(BaseScroller):
+    """Scrolling strategy for infinite scrolling pages."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+
+    def apply(self, page, **kwargs):
+        """Apply the InfiniteScroller strategy to the page."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: strategies/scrolling/init.py
+================================================================================
+
+"""
+Scrolling strategies for different platforms.
+"""
+from src.fetch_data.strategies.scrolling.base_scroller import BaseScroller
+
+__all__ = ["BaseScroller"]
+
+
+================================================================================
+File: strategies/scrolling/pagination_scroller.py
+================================================================================
+
+from .base_scroller import BaseScroller
+
+class PaginationScroller(BaseScroller):
+    """Scrolling strategy for paginated content."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+
+    def apply(self, page, **kwargs):
+        """Apply the PaginationScroller strategy to the page."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: strategies/scrolling/timed_scroller.py
+================================================================================
+
+from .base_scroller import BaseScroller
+
+class TimedScroller(BaseScroller):
+    """Scrolling strategy with timed intervals."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+
+    def apply(self, page, **kwargs):
+        """Apply the TimedScroller strategy to the page."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: strategies/scrolling/__init__.py
+================================================================================
+
+# Init file for package
+
+
+================================================================================
+File: strategies/stealth/base_stealth.py
+================================================================================
+
+"""
+Base stealth strategy module for handling anti-detection measures.
+"""
+from abc import ABC, abstractmethod
+from typing import Dict, Any, Optional, List, Tuple, Union
+
+from playwright.sync_api import Page, Error as PlaywrightError
+
+from src.utils.logging_util import setup_logger, log_exception
+from src.fetch_data.exceptions import StealthError
+
+
+class BaseStealth(ABC):
+    """
+    Base stealth strategy class for handling anti-detection on various platforms.
+
+    This class defines the interface for stealth strategies and provides
+    common functionality for evading bot detection.
+    """
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """
+        Initialize the stealth strategy.
+
+        Args:
+            config: Optional configuration dictionary
+        """
+        self.config = config or {}
+        self.logger = setup_logger(f"{self.__class__.__name__}")
+        self.page: Optional[Page] = None
+
+        # Stealth configuration
+        self.user_agent = self.config.get("user_agent", "")
+        self.use_proxy = self.config.get("use_proxy", False)
+        self.proxy_config = self.config.get("proxy", {})
+
+    def initialize(self, page: Page) -> None:
+        """
+        Set the Playwright page object for this stealth strategy.
+
+        Args:
+            page: Playwright Page object
+
+        Raises:
+            ValueError: If page is None
+        """
+        if page is None:
+            raise ValueError("Page cannot be None")
+
+        self.page = page
+        self.logger.info(
+            f"Initialized {self.__class__.__name__} with Playwright page")
+
+    @abstractmethod
+    async def apply(self) -> bool:
+        """
+        Apply stealth measures to the current browser session.
+
+        This method must be implemented by all stealth strategies.
+
+        Returns:
+            bool: True if stealth measures were applied successfully, False otherwise
+
+        Raises:
+            StealthError: If applying stealth measures fails
+            NotImplementedError: If not implemented by subclass
+        """
+        raise NotImplementedError("Stealth strategy must implement apply()")
+
+    async def set_random_user_agent(self) -> bool:
+        """
+        Set a random user agent from the configured list or a default list.
+
+        Returns:
+            bool: True if user agent was set successfully, False otherwise
+        """
+        if self.page is None:
+            self.logger.error("Page not initialized, cannot set user agent")
+            return False
+
+        try:
+            # Use provided user agent or a default one
+            user_agent = self.user_agent or "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+
+            await self.page.evaluate(
+                f"() => {{ Object.defineProperty(navigator, 'userAgent', {{ get: () => '{user_agent}' }}); }}")
+            self.logger.debug(f"Set user agent: {user_agent}")
+            return True
+        except PlaywrightError as e:
+            log_exception(self.logger, e, "Error setting user agent")
+            return False
+
+    async def is_detected(self) -> bool:
+        """
+        Check if the current session has been detected as a bot.
+
+        Returns:
+            bool: True if detected as a bot, False if not detected or cannot determine
+        """
+        if self.page is None:
+            self.logger.error("Page not initialized, cannot check if detected")
+            return True
+
+        # Basic implementation, subclasses should implement specific detection checks
+        try:
+            # Check for common bot detection indicators
+            has_captcha = await self.page.query_selector(
+                "iframe[src*='captcha']") is not None
+            has_block_message = await self.page.query_selector(
+                "body:has-text('blocked')") is not None
+
+            return has_captcha or has_block_message
+        except PlaywrightError as e:
+            log_exception(self.logger, e, "Error checking if detected as bot")
+            return True  # Assume detected if we can't check
+
+
+================================================================================
+File: strategies/stealth/fingerprint_spoofer.py
+================================================================================
+
+from .base_stealth import BaseStealth
+
+class FingerprintSpoofer(BaseStealth):
+    """Strategy to modify browser fingerprints."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+
+    def apply(self, page, **kwargs):
+        """Apply the FingerprintSpoofer strategy to the page."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: strategies/stealth/human_behavior.py
+================================================================================
+
+from .base_stealth import BaseStealth
+
+class HumanBehavior(BaseStealth):
+    """Strategy to mimic human browsing patterns."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+
+    def apply(self, page, **kwargs):
+        """Apply the HumanBehavior strategy to the page."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: strategies/stealth/init.py
+================================================================================
+
+"""
+Stealth strategies for evading detection.
+"""
+from src.fetch_data.strategies.stealth.base_stealth import BaseStealth
+
+__all__ = ["BaseStealth"]
+
+
+================================================================================
+File: strategies/stealth/proxy_rotator.py
+================================================================================
+
+from .base_stealth import BaseStealth
+
+class ProxyRotator(BaseStealth):
+    """Strategy to rotate proxies to avoid detection."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+
+    def apply(self, page, **kwargs):
+        """Apply the ProxyRotator strategy to the page."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: strategies/stealth/user_agent_rotator.py
+================================================================================
+
+from .base_stealth import BaseStealth
+
+class UserAgentRotator(BaseStealth):
+    """Strategy to rotate user agents."""
+
+    def __init__(self, config=None):
+        super().__init__(config)
+
+    def apply(self, page, **kwargs):
+        """Apply the UserAgentRotator strategy to the page."""
+        # Implementation
+        pass
+
+
+================================================================================
+File: strategies/stealth/__init__.py
+================================================================================
+
+# Init file for package
+
+
+================================================================================
+File: utils/rate_limiter.py
+================================================================================
+
+# Utility functions for rate limiting
+
+def limit_requests(max_requests: int, period: int):
+    """
+Limit requests to a specified number in a time period.
+
+Args:
+        max_requests: Maximum number of requests
+        period: Time period in seconds
+
+Returns:
+A decorator function that limits requests
+"""
+    # Implementation
+    pass
+
+
+================================================================================
+File: utils/request_queue.py
+================================================================================
+
+# Utility functions for request queuing
+
+def queue_request(url: str, priority: int = 0):
+    """
+Queue a URL for fetching with priority.
+
+Args:
+        url: The URL to fetch
+        priority: Priority level (higher numbers = higher priority)
+
+Returns:
+Queue ID for the request
+"""
+    # Implementation
+    pass
+
+
+================================================================================
+File: utils/selector_helper.py
+================================================================================
+
+# Utility functions for CSS/XPath selection
+
+def create_dynamic_selector(base_selector: str, **kwargs):
+    """
+Create a dynamic CSS selector with replaceable parameters.
+
+Args:
+        base_selector: Base selector with placeholders
+        **kwargs: Parameters to replace in the selector
+
+Returns:
+Formatted CSS selector string
+"""
+    # Implementation
+    pass
+
+
+================================================================================
+File: utils/__init__.py
+================================================================================
+
+# Init file for package
+

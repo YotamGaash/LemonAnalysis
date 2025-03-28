@@ -4,10 +4,9 @@ Base authentication strategy module for handling website login.
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 
-from playwright.sync_api import Page, Error as PlaywrightError
+from playwright.sync_api import Page
 
-from src.utils.logging_util import setup_logger, log_exception
-from src.fetch_data.exceptions import AuthenticationError
+from legacy.src.utils.logging_util import setup_logger
 
 
 class BaseAuth(ABC):

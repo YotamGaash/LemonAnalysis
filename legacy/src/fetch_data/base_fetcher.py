@@ -1,18 +1,16 @@
 import json
 import os
 import time
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from contextlib import AbstractContextManager
-from src.utils.logging_util import setup_logger, log_exception
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any
 
 from playwright.sync_api import Page, Error as PlaywrightError
 
-from src.utils.config_util import ConfigUtil
-from src.utils.logging_util import setup_logger, log_exception
-from src.fetch_data.exceptions import (
-    FetcherError, InitializationError, ConfigurationError,
-    FetchingError, ExtractionError
+from legacy.src.utils.config_util import ConfigUtil
+from legacy.src.utils.logging_util import log_exception
+from legacy.src.fetch_data.exceptions import (
+    InitializationError, FetchingError
 )
 
 class BaseFetcher(AbstractContextManager):
@@ -32,7 +30,7 @@ class BaseFetcher(AbstractContextManager):
             config: Optional custom configuration that overrides default settings.
         """
         # Setup logger
-        from src.utils.logging_util import setup_logger
+        from legacy.src.utils.logging_util import setup_logger
         self.logger = setup_logger(f"{self.__class__.__name__}")
         self.logger.info(f"Initializing {self.__class__.__name__}")
 
@@ -43,7 +41,7 @@ class BaseFetcher(AbstractContextManager):
         if config and "platform" in config:
             self.platform = config["platform"]
         else:
-            from src.utils.platform_util import determine_platform
+            from legacy.src.utils.platform_util import determine_platform
             self.platform = determine_platform(config)
 
         # Load configuration
@@ -82,8 +80,8 @@ class BaseFetcher(AbstractContextManager):
             self.logger.debug(
                 f"Configuration loaded for {self.__class__.__name__}")
         except Exception as e:
-            from src.fetch_data.exceptions import ConfigurationError
-            from src.utils.logging_util import log_exception
+            from legacy.src.fetch_data.exceptions import ConfigurationError
+            from legacy.src.utils.logging_util import log_exception
 
             error_msg = f"Error loading configuration: {str(e)}"
             log_exception(self.logger, e, "Error loading configuration")
@@ -195,8 +193,6 @@ class BaseFetcher(AbstractContextManager):
         """Logs and raises formatted exceptions."""
         log_exception(self.logger, exc, message)
         raise FetchingError(message) from exc
-
-    import json, os
 
     def save_session(self, session_data: Dict[str, Any], path: str):
         """Saves session data (cookies/tokens) to a file to reuse later sessions."""

@@ -2,12 +2,11 @@
 Base stealth strategy module for handling anti-detection measures.
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List, Tuple, Union
+from typing import Dict, Any, Optional
 
 from playwright.sync_api import Page, Error as PlaywrightError
 
-from src.utils.logging_util import setup_logger, log_exception
-from src.fetch_data.exceptions import StealthError
+from legacy.src.utils.logging_util import setup_logger, log_exception
 
 
 class BaseStealth(ABC):

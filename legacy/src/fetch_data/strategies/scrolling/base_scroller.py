@@ -2,12 +2,11 @@
 Base scrolling strategy module for handling page navigation.
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List, Tuple, Union
+from typing import Dict, Any, Optional
 
 from playwright.sync_api import Page, Error as PlaywrightError
 
-from src.utils.logging_util import setup_logger, log_exception
-from src.fetch_data.exceptions import ScrollingError
+from legacy.src.utils.logging_util import setup_logger, log_exception
 
 
 class BaseScroller(ABC):

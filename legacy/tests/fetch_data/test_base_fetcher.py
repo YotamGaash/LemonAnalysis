@@ -1,8 +1,8 @@
 import os
 
 import pytest
-from unittest.mock import Mock, patch
-from src.fetch_data.exceptions import PlaywrightError, InitializationError
+from unittest.mock import Mock
+from legacy.src.fetch_data.exceptions import PlaywrightError, InitializationError
 from playwright.sync_api import Page
 
 

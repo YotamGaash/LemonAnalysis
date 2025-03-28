@@ -1,6 +1,3 @@
-import pytest
-from src.fetch_data.fetcher_factory import FetcherFactory
-
 def test_fetcher_factory_initialization():
     # Test initialization
     pass

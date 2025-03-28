@@ -5,8 +5,8 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from src.utils.config_util import ConfigUtil
-from src.utils.logging_util import setup_logger
+from legacy.src.utils.config_util import ConfigUtil
+from legacy.src.utils.logging_util import setup_logger
 
 logger = setup_logger(__name__)
 

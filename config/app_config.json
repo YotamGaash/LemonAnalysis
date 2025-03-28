@@ -1,0 +1,104 @@
+{
+  "app": {
+    "name": "Lemonade",
+    "version": "1.0.0",
+    "environment": "development"
+  },
+  "logging": {
+    "enabled": true,
+    "log_dir": "logs",
+    "log_file_name": "app.log",
+    "max_file_size": 5242880,
+    "backup_count": 3,
+    "encoding": "utf-8",
+
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "date_format": "%Y-%m-%d %H:%M:%S",
+
+    "console": {
+      "enabled": true,
+      "level": "DEBUG",
+      "format": "%(asctime)s - %(name)s - [%(levelname)s] - %(message)s",
+      "use_colors": true
+    },
+
+    "file": {
+      "enabled": true,
+      "level": "INFO",
+      "format": "%(asctime)s - %(name)s - [%(levelname)s] - %(message)s - %(pathname)s:%(lineno)d"
+    },
+
+    "errors": {
+      "include_traceback": true,
+      "traceback_level": "DEBUG"
+    }
+  },
+  "storage": {
+    "base_dir": "data",
+    "sessions": "sessions",
+    "screenshots": "screenshots",
+    "cache": "cache",
+    "raw_data": "raw",
+    "processed_data": "processed",
+    "proxies": "proxies"
+  },
+  "fetcher": {
+    "default_platform": "facebook",
+    "timeout_ms": 60000,
+    "stealth_mode": true,
+    "screenshot_on_error": true,
+    "retry": {
+      "attempts": 3,
+      "delay_ms": 5000
+    }
+  },
+  "authentication": {
+    "method": "credential",
+    "session_validity_days": 7,
+    "auto_renew_session": true
+  },
+  "stealth": {
+    "user_agent_rotation": true,
+    "fingerprint_spoofing": true,
+    "proxy": {
+      "enabled": false,
+      "rotation_interval_seconds": 600
+    },
+    "human_behavior": {
+      "enabled": true,
+      "delay_ms": {
+        "min": 500,
+        "max": 3000
+      }
+    }
+  },
+  "platforms": {
+    "facebook": {
+      "base_url": "https://facebook.com",
+      "login_url": "https://facebook.com/login",
+      "selectors": {
+        "login": {
+          "email_field": "#email",
+          "password_field": "#pass",
+          "login_button": "[data-testid='royal_login_button']",
+          "error_box": "#error_box",
+          "logged_in_indicator": "[data-testid='bookmark_nav']"
+        }
+      },
+      "timeouts": {
+        "login_ms": 30000,
+        "checkpoint_ms": 20000,
+        "verification_ms": 15000,
+        "action_ms": 10000
+      },
+      "session": {
+        "storage_path": "facebook",
+        "max_age_days": 7
+      },
+      "rate_limits": {
+        "requests_per_hour": 100,
+        "delay_between_requests_ms": 1000
+      }
+    }
+  }
+}

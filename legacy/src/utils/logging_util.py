@@ -5,7 +5,7 @@ import traceback
 from logging.handlers import RotatingFileHandler
 from typing import Optional
 
-from src.utils.config_util import ConfigUtil
+from legacy.src.utils.config_util import ConfigUtil
 
 
 def setup_logger(logger_name: str) -> logging.Logger:

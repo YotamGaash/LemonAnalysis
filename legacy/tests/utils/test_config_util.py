@@ -2,8 +2,7 @@
 import json
 import os
 import pytest
-from pathlib import Path
-from src.utils.config_util import ConfigUtil
+from legacy.src.utils.config_util import ConfigUtil
 
 
 @pytest.fixture

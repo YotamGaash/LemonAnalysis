@@ -1,11 +1,7 @@
-from src.fetch_data.base_fetcher import BaseFetcher
-from src.utils.logging_util import setup_logger, log_exception
-from playwright.sync_api import Page, Error as PlaywrightError
-from src.utils.config_util import ConfigUtil
-import json
-import os
-import time
-from typing import Optional, Dict, Any
+from legacy.src.fetch_data.base_fetcher import BaseFetcher
+from legacy.src.utils.logging_util import setup_logger
+from playwright.sync_api import Page
+from typing import Dict, Any
 
 
 class FacebookFetcher(BaseFetcher):

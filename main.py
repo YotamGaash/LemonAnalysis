@@ -1,8 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
-from playwright.sync_api import Page, PlaywrightError
-from src.fetch_data.base_fetcher import BaseFetcher
-from src.utils.config_util import ConfigUtil
+from playwright.sync_api import Page, Error as PlaywrightError
+from legacy.src.fetch_data.base_fetcher import BaseFetcher
 
 
 # Concrete implementation of BaseFetcher for testing
@@ -28,7 +27,7 @@ def test_fetcher():
 
 
 @pytest.fixture
-def configured_fetcher():
+def configured_fetcher(mock_config):
     config = {
         "platform": "test_platform",
         "timeout": 5000,

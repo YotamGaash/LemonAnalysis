@@ -1,9 +1,7 @@
-from src.fetch_data.strategies.authentication.base_auth import BaseAuth
-from src.utils.config_util import ConfigUtil
-from src.utils.logging_util import setup_logger, log_exception
+from legacy.src.fetch_data.strategies.authentication.base_auth import BaseAuth
+from legacy.src.utils.config_util import ConfigUtil
+from legacy.src.utils.logging_util import setup_logger, log_exception
 from playwright.sync_api import Page, Error as PlaywrightError
-import time
-import os
 
 
 class FacebookAuthentication(BaseAuth):

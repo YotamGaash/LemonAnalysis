@@ -1,0 +1,252 @@
+2025-03-25 14:35:07,282 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,346 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,346 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute 'get_from_env'
+2025-03-25 14:35:07,363 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,363 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,378 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,394 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,394 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute 'get_from_env'
+2025-03-25 14:35:07,410 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,410 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute 'get_from_env'
+2025-03-25 14:35:07,427 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,427 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute 'get_from_env'
+2025-03-25 14:35:07,458 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,458 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute 'get_from_env'
+2025-03-25 14:35:07,474 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,474 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute 'get_from_env'
+2025-03-25 14:35:07,492 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,492 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute 'get_from_env'
+2025-03-25 14:35:07,506 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,506 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute 'get_from_env'
+2025-03-25 14:35:07,522 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,522 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute 'get_from_env'
+2025-03-25 14:35:07,538 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 14:35:07,538 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute 'get_from_env'
+2025-03-25 14:35:07,589 - file_logger - INFO - This is a test log message.
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 0
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 1
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 2
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 3
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 4
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 5
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 6
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 7
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 8
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 9
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 10
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 11
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 12
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 13
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 14
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 15
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 16
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 17
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 18
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 19
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 20
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 21
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 22
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 23
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 24
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 25
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 26
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 27
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 28
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 29
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 30
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 31
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 32
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 33
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 34
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 35
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 36
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 37
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 38
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 39
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 40
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 41
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 42
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 43
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 44
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 45
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 46
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 47
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 48
+2025-03-25 14:35:07,589 - rotation_logger - INFO - Log message 49
+2025-03-25 15:00:49,726 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,787 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,787 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute '_get_from_env'
+2025-03-25 15:00:49,804 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,804 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,821 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,821 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,821 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute '_get_from_env'
+2025-03-25 15:00:49,837 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,837 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute '_get_from_env'
+2025-03-25 15:00:49,853 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,853 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute '_get_from_env'
+2025-03-25 15:00:49,883 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,883 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute '_get_from_env'
+2025-03-25 15:00:49,898 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,898 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute '_get_from_env'
+2025-03-25 15:00:49,914 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,914 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute '_get_from_env'
+2025-03-25 15:00:49,930 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,930 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute '_get_from_env'
+2025-03-25 15:00:49,946 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,946 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute '_get_from_env'
+2025-03-25 15:00:49,963 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:00:49,963 - TestFetcher - ERROR - Error loading configuration: 'str' object has no attribute '_get_from_env'
+2025-03-25 15:00:50,058 - file_creation_test - INFO - Test message
+2025-03-25 15:00:50,058 - rotation_test - INFO - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+2025-03-25 15:00:50,058 - rotation_test - INFO - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+2025-03-25 15:00:50,058 - rotation_test - INFO - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+2025-03-25 15:00:50,074 - formatter_test - INFO - Test formatting
+2025-03-25 15:00:50,090 - level_test - INFO - Test INFO
+2025-03-25 15:00:50,090 - level_test - WARNING - Test WARNING
+2025-03-25 15:00:50,108 - level_test - ERROR - Test ERROR
+2025-03-25 15:00:50,110 - level_test - CRITICAL - Test CRITICAL
+2025-03-25 15:00:50,121 - exception_test - ERROR - An error occurred
+Traceback (most recent call last):
+  File "C:\Projects\Lemonade\tests\utils\test_logging_util.py", line 180, in test_exception_logging
+    raise ValueError("Test exception")
+ValueError: Test exception
+2025-03-25 15:41:32,630 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,684 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,684 - TestFetcher - ERROR - Error loading configuration: 'dict' object has no attribute 'split'
+2025-03-25 15:41:32,700 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,711 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,730 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,731 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,731 - TestFetcher - ERROR - Error loading configuration: 'dict' object has no attribute 'split'
+2025-03-25 15:41:32,747 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,747 - TestFetcher - ERROR - Error loading configuration: 'dict' object has no attribute 'split'
+2025-03-25 15:41:32,763 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,763 - TestFetcher - ERROR - Error loading configuration: 'dict' object has no attribute 'split'
+2025-03-25 15:41:32,779 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,779 - TestFetcher - ERROR - Error loading configuration: 'dict' object has no attribute 'split'
+2025-03-25 15:41:32,795 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,795 - TestFetcher - ERROR - Error loading configuration: 'dict' object has no attribute 'split'
+2025-03-25 15:41:32,810 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,810 - TestFetcher - ERROR - Error loading configuration: 'dict' object has no attribute 'split'
+2025-03-25 15:41:32,834 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,834 - TestFetcher - ERROR - Error loading configuration: 'dict' object has no attribute 'split'
+2025-03-25 15:41:32,841 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,841 - TestFetcher - ERROR - Error loading configuration: 'dict' object has no attribute 'split'
+2025-03-25 15:41:32,857 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:41:32,857 - TestFetcher - ERROR - Error loading configuration: 'dict' object has no attribute 'split'
+2025-03-25 15:51:10,637 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,690 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,706 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,706 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,738 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,738 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,762 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,774 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,786 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,790 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,810 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,821 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,833 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:51:10,851 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,177 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,241 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,257 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,257 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,273 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,289 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,289 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,305 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,323 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,323 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,354 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,356 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,380 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:56:04,386 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,778 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,826 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,842 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,842 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,866 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,875 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,888 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,901 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,908 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,924 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,935 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,940 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,958 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:57:54,966 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:09,978 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,042 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,042 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,059 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,073 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,073 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,089 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,104 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,104 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,120 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,137 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,137 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,152 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 15:58:10,168 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,633 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,680 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,696 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,712 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,712 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,728 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,728 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,752 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,760 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,760 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,777 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,792 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,792 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 16:07:59,807 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,330 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,398 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,412 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,420 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,429 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,438 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,441 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,457 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,471 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,473 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,489 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,505 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,516 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:33:56,526 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,760 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,808 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,828 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,828 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,840 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,840 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,856 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,872 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,872 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,887 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,903 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,903 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,919 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:35:01,935 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,006 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,058 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,086 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,086 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,106 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,106 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,117 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,137 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,149 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,149 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,169 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,181 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,181 - TestFetcher - INFO - Initializing TestFetcher
+2025-03-25 17:42:08,207 - TestFetcher - INFO - Initializing TestFetcher

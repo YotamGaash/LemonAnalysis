@@ -3,7 +3,7 @@ Utility functions for platform-related operations.
 """
 from typing import Dict, Any, Optional
 
-from src.utils.config_util import ConfigUtil
+from legacy.src.utils.config_util import ConfigUtil
 
 
 def determine_platform(config: Optional[Dict[str, Any]] = None) -> str:
